@@ -2,7 +2,6 @@ package tests;
 
 import org.junit.jupiter.api.Test;
 
-import config.TestConfig;
 import fixtures.TestSetup;
 import pages.ResetPasswordPage;
 
@@ -12,7 +11,7 @@ public class ResetPasswordTest extends TestSetup {
         ResetPasswordPage resetPasswordPage = new ResetPasswordPage(page);
 
         resetPasswordPage.open();
-        resetPasswordPage.checkValidEmail(TestConfig.CUSTOMER_EMAIL);
+        resetPasswordPage.checkValidEmail("customer@practicesoftwaretesting.com");
         resetPasswordPage.open();
         resetPasswordPage.checkInvalidEmail("val@practicesoftwaretesting.com");
     }

@@ -61,11 +61,13 @@ jobs:
       - name: Wait for the shop to be up
         run: |
           for i in $(seq 1 60); do
-            if curl -sf http://localhost:8091/products > /dev/null && curl -sf http://localhost:4200 > /dev/null; then
-              echo "Shop is up"; exit 0
-            fi
-            echo "Waiting for API/UI ($i/60)"; sleep 5
+            api=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8091/products || true)
+            ui=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:4200 || true)
+            echo "($i/60) API=$api UI=$ui"
+            if [ "$api" = "200" ] && [ "$ui" = "200" ]; then echo "Shop is up"; exit 0; fi
+            sleep 5
           done
+          docker ps -a
           exit 1
 
       - name: Run Playwright tests

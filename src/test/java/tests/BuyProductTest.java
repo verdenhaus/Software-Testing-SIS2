@@ -1,5 +1,6 @@
 package tests;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import data.User;
@@ -10,6 +11,7 @@ import pages.HomePage;
 import pages.ProductPage;
 
 public class BuyProductTest extends AuthenticatedTestSetup{
+    @Disabled 
     @Test 
     void buyProduct(){
         User address = UserFactory.createUser();

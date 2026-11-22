@@ -25,9 +25,7 @@ jobs:
         shardTotal: [4]
     env:
       CI: true
-      BASE_URL: ${{ vars.BASE_URL }}
-      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
-      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      BASE_URL: http://localhost:4200
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +40,33 @@ jobs:
 
       - name: Install Playwright browsers
         run: mvn -B -ntp exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium"
+
+      - name: Start the shop in Docker
+        run: |
+          git clone --depth 1 https://github.com/testsmith-io/practice-software-testing.git pst
+          cd pst
+          docker compose -f docker-compose.prod.yml up --pull missing -d
+
+      - name: Seed the database
+        working-directory: pst
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose -f docker-compose.prod.yml exec -T laravel-api php artisan migrate:fresh --seed --force; then
+              exit 0
+            fi
+            echo "Database not ready yet, retrying in 5 s ($i/30)"; sleep 5
+          done
+          exit 1
+
+      - name: Wait for the shop to be up
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8091/products > /dev/null && curl -sf http://localhost:4200 > /dev/null; then
+              echo "Shop is up"; exit 0
+            fi
+            echo "Waiting for API/UI ($i/60)"; sleep 5
+          done
+          exit 1
 
       - name: Run Playwright tests
         run: mvn -B -ntp test
@@ -58,6 +83,11 @@ jobs:
             reports/
           retention-days: 14
           if-no-files-found: ignore
+
+      - name: Docker logs (on failure)
+        if: failure()
+        working-directory: pst
+        run: docker compose -f docker-compose.prod.yml logs --tail=100
 
   merge-reports:
     name: Merge reports

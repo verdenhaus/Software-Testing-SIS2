@@ -41,6 +41,11 @@ jobs:
       - name: Install Playwright browsers
         run: mvn -B -ntp exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium"
 
+      - name: Set up QEMU (some shop images are ARM-only)
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Start the shop in Docker
         run: |
           git clone --depth 1 https://github.com/testsmith-io/practice-software-testing.git pst

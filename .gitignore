@@ -1,1 +1,7 @@
 target/
+test-results/
+playwright-report/
+reports/
+all-results/
+.act-artifacts/
+.secrets

@@ -16,7 +16,7 @@ permissions:
 jobs:
   test:
     name: Tests (shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -63,7 +63,7 @@ jobs:
     name: Merge reports
     if: ${{ !cancelled() }}
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
